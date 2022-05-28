@@ -24,6 +24,7 @@ namespace SDE.Begone.Test
         {
             var test = @"
     using System;
+    using System.Data.Entity;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -52,8 +53,8 @@ namespace SDE.Begone.Test
         }
     }";
 
-            var expected = VerifyCS.Diagnostic("SDEBegone").WithLocation(0).WithArguments("TypeName");
-            await VerifyCS.VerifyCodeFixAsync(test, expected, fixtest);
+            var expected = VerifyCS.Diagnostic("SDEBegone").WithLocation(0);//.WithArguments("TypeName");
+            await VerifyCS.VerifyAnalyzerAsync(test, expected);
         }
     }
 }

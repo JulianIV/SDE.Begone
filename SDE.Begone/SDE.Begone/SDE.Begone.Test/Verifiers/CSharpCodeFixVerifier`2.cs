@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,9 +29,12 @@ namespace SDE.Begone.Test
         /// <inheritdoc cref="CodeFixVerifier{TAnalyzer, TCodeFix, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
         public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
         {
+            var referenceAssemblies = ReferenceAssemblies.NetCore.NetCoreApp20.AddPackages(ImmutableArray.Create(new PackageIdentity("EntityFramework", "6.4.4"), new PackageIdentity("serilog", "2.10.0")));
+            
             var test = new Test
             {
                 TestCode = source,
+                ReferenceAssemblies = referenceAssemblies,
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
@@ -52,6 +56,7 @@ namespace SDE.Begone.Test
             {
                 TestCode = source,
                 FixedCode = fixedSource,
+                ReferenceAssemblies = ReferenceAssemblies.Default.AddPackages(ImmutableArray.Create(new PackageIdentity("EntityFramework", "6.4.4"))),
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
