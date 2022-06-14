@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.Testing.Verifiers;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.CodeAnalysis.Testing.ReferenceAssemblies;
 
 namespace SDE.Begone.Test
 {
@@ -56,9 +57,9 @@ namespace SDE.Begone.Test
             {
                 TestCode = source,
                 FixedCode = fixedSource,
-                ReferenceAssemblies = ReferenceAssemblies.Default.AddPackages(ImmutableArray.Create(new PackageIdentity("EntityFramework", "6.4.4"))),
             };
 
+            test.ReferenceAssemblies = NetCore.NetCoreApp31.WithPackages(ImmutableArray.Create(new PackageIdentity[] { new PackageIdentity("EntityFramework", "6.4.4") }));
             test.ExpectedDiagnostics.AddRange(expected);
             await test.RunAsync(CancellationToken.None);
         }

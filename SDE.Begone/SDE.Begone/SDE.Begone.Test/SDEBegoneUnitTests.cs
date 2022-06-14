@@ -1,60 +1,85 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Testing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
-using VerifyCS = SDE.Begone.Test.CSharpCodeFixVerifier<
-    SDE.Begone.SDEBegoneAnalyzer,
-    SDE.Begone.SDEBegoneCodeFixProvider>;
+using VerifyCS = SDE.Begone.Test.CSharpCodeFixVerifier< SDE.Begone.SDEBegoneAnalyzer, SDE.Begone.SDEBegoneCodeFixProvider>;
 
 namespace SDE.Begone.Test
 {
     [TestClass]
     public class SDEBegoneUnitTest
     {
-        //No diagnostics expected to show up
         [TestMethod]
-        public async Task TestMethod1()
+        public async Task Should_Produce_No_Diagnostics()
         {
+            // Arrange
             var test = @"";
 
+            // Act and Assert
             await VerifyCS.VerifyAnalyzerAsync(test);
         }
 
-        //Diagnostic and CodeFix both triggered and checked for
         [TestMethod]
-        public async Task TestMethod2()
+        public async Task Should_Produce_Diagnostic()
         {
+            // Arrange
             var test = @"
-    using System;
-    using System.Data.Entity;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
 
-    namespace ConsoleApplication1
-    {
-        class {|#0:TypeName|}
-        {   
+namespace ConsoleApplication1
+{
+    class TestClass
+    {   
+
+    }
+}";
+
+            var expectedSystemDataEntityDiagnosticResult = new DiagnosticResult("SDEBegone", DiagnosticSeverity.Warning).WithSpan(4, 1, 4, 26).WithArguments("System.Data.Entity");
+            var expectedEntityNamespaceNotFoundDiagnosticResult = new DiagnosticResult("CS0234", DiagnosticSeverity.Error).WithSpan(4, 19, 4, 25).WithArguments("Entity", "System.Data");
+            
+            // Act and Assert
+            await VerifyCS.VerifyAnalyzerAsync(test, expectedSystemDataEntityDiagnosticResult, expectedEntityNamespaceNotFoundDiagnosticResult);
         }
-    }";
+
+        [TestMethod]
+        public async Task Should_Produce_Diagnostic_And_Apply_Code_Fix()
+        {
+            // Arrange
+            var test = @"
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+
+namespace ConsoleApplication1
+{
+    class TestClass
+    {   
+
+    }
+}";
 
             var fixtest = @"
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-    namespace ConsoleApplication1
-    {
-        class TYPENAME
-        {   
-        }
-    }";
+namespace ConsoleApplication1
+{
+    class TestClass
+    {   
 
-            var expected = VerifyCS.Diagnostic("SDEBegone").WithLocation(0);//.WithArguments("TypeName");
-            await VerifyCS.VerifyAnalyzerAsync(test, expected);
+    }
+}";
+
+            var expectedSystemDataEntityDiagnosticResult = new DiagnosticResult("SDEBegone", DiagnosticSeverity.Warning).WithSpan(4, 1, 4, 26);
+
+            // Act and Assert
+            await VerifyCS.VerifyCodeFixAsync(test, expected: new[] { expectedSystemDataEntityDiagnosticResult, },
+            fixtest);
         }
     }
 }
