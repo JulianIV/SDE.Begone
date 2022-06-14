@@ -20,6 +20,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore SDE.Begone/SDE.Begone.sln
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build SDE.Begone/SDE.Begone.sln --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test SDE.Begone/SDE.Begone.sln --no-build --verbosity normal
