@@ -16,9 +16,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 3.1.x
+    - name: where are we
+      run: dir
     - name: CD to folder
       run: CD SDE.Begone
+    - name: where are we
+      run: dir
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
